@@ -1,0 +1,23 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30717.126
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "CardRecognition", "CardRecognition\CardRecognition.pyproj", "{A5E744F0-5FBA-46D5-9B0C-51902124855D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A5E744F0-5FBA-46D5-9B0C-51902124855D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A5E744F0-5FBA-46D5-9B0C-51902124855D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1B97B076-3C85-485A-9BFD-1CB8AEC3CAAA}
+	EndGlobalSection
+EndGlobal
