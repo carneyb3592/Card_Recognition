@@ -12,8 +12,10 @@ if not cap.isOpened():
 CARD_RATIO = 0.63
 CARD_AREA_MIN = 25000
 CARD_AREA_MAX = 80000
-SUIT_AREA_MIN = 200
-SUIT_AREA_MAX = 5000
+SUIT_AREA_MIN = 50
+SUIT_AREA_MAX = 150
+RANK_AREA_MIN = 50
+RANK_AREA_MAX = 150
 FILEPATH = r'C:\Users\djntr\source\repos\CardRecognition\CardRecognition\CardImages\\'
 
 
@@ -122,12 +124,18 @@ def detect_Cards(contours, frame):
     
 
 def recognize_cards(cards, frame,contours,hierarchy):
-    suits = process_suits()
-    values = process_values()
-
+    #suits = process_suits()
+    #values = process_values()
     for card in cards:
         card.correctedImg = makeCardReadable(card, frame)
         cv2.imshow('Rcards',card.correctedImg)
+        
+        #cannyR = cv2.Canny(card.correctedImg, 150, 175)
+        #ret, thresh = cv2.threshold(cannyR, 127, 255, 0)
+        #contours2, hierarchy2 = cv2.findContours(thresh,cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        #for contour in contours2:
+        #    (x,y,w,h) = cv2.boundingRect(contour)
+        #    cv2.rectangle(frame, (x,y), (x+w,y+h), (0,255,0), 2)
         
         card.suitImg, card.rankImg = isolateSuitsValues(card.correctedImg,frame)
         cv2.imshow('Rank',card.rankImg)
@@ -217,32 +225,31 @@ def isolateSuitsValues(cardImg,frame):
     suit_img = []
     value_img = []
    
-    rankImg = cv2.resize(cardImg[0:45,0:32],(40,80))
-    cannyR = cv2.Canny(rankImg, 150, 175)
-    retR, threshR = cv2.threshold(cannyR, 127, 255, 0)
-    contoursR, hierarchyR = cv2.findContours(threshR,cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    cv2.drawContours(rankImg,contoursR, -1, (0,255,0), 0)
-    for contour in contoursR:
-         (x,y,w,h) = cv2.boundingRect(contour)
-         cv2.rectangle(rankImg, (x,y), (x+w,y+h), (0,255,0), 2)
-    suitImg = cv2.resize(cardImg[40:84,0:32],(60,90))
-    cannyS = cv2.Canny(suitImg, 150, 175)
-    retS, threshS = cv2.threshold(cannyS, 127, 255, 0)
-    contoursS, hierarchyS = cv2.findContours(threshS,cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    cardImg = cv2.resize(cardImg[0:84,0:32],(0,0),fx = 4, fy = 4)
 
-    cv2.drawContours(suitImg,contoursS, -1, (0,255,0), 0)
-    for contour in contoursS:
-         (x,y,w,h) = cv2.boundingRect(contour)
-         cv2.rectangle(suitImg, (x,y), (x+w,y+h), (0,255,0), 2)
+    cannyR = cv2.Canny(cardImg, 150, 175)
+    ret, thresh = cv2.threshold(cannyR, 127, 255, cv2.THRESH_BINARY_INV)
+    Qrank = thresh[20:185, 0:128]
+    Qsuit = thresh[186:336, 0:128]
+    contours, hierarchy = cv2.findContours(Qrank,cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    contours = sorted(contours, key=cv2.contourArea,reverse=True)
     
-    #for contour in contours:
-    #   (x,y,w,h) = cv2.boundingRect(contour)
-     #  cv2.rectangle(frame, (x,y), (x+w,y+h), (0,255,0), 2)
+    if len(contours) != 0:
+        (x,y,w,h) = cv2.boundingRect(contours[0])
+        suit_img = thresh[y:y+h, x:x+w]
+        value_img = thresh[y:y+h,x:x+w]
+    
+    
 
-    return suitImg, rankImg
+    #cv2.drawContours(rankImg,contoursR, -1, (0,255,0), 0)
+        #for contour in contours:
+    #   (x,y,w,h) = cv2.boundingRect(contour)
+    #   cv2.rectangle(frame, (x,y), (x+w,y+h), (0,255,0), 2)
+
+    return np.array(suit_img), np.array(value_img)
 
 while True:
-    cv2.waitKey(100)
+    cv2.waitKey(200)
     ret, frame = cap.read()
     #frame = cv2.resize(frame, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_AREA
 
