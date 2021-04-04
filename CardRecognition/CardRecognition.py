@@ -128,14 +128,14 @@ def recognize_cards(cards, frame,contours,hierarchy):
     for card in cards:
         card.correctedImg = makeCardReadable(card, frame)
         cv2.imshow('Rcards',card.correctedImg)
-        card.rankImg = cv2.resize(card.correctedImg[0:45,0:32],(40,80))
+        
+        card.suitImg, card.rankImg = isolateSuitsValues(card.correctedImg,frame)
         cv2.imshow('Rank',card.rankImg)
-        card.suitImg = cv2.resize(card.correctedImg[45:84,0:32],(60,90))
         cv2.imshow('Suit',card.suitImg)
-        c = cv2.waitKey(1)
-        if c == ord('q'):
-            cv2.imwrite("Four.jpg",card.rankImg)
-            cv2.imwrite("Clubs.jpg",card.suitImg)
+        #c = cv2.waitKey(1)
+        #if c == ord('q'):
+         #   cv2.imwrite("Four.jpg",card.rankImg)
+          #  cv2.imwrite("Clubs.jpg",card.suitImg)
 
         #card.suit = detect_suit(card,suits)
         #card.rank, card.value = detect_value(card,values)
@@ -171,6 +171,7 @@ def detect_value(card,values):
             best_name = value.name
             best_value = value.value
     return best_name, best_value
+
 def makeCardReadable(card, frame):
 
     'Sourced from https://www.pyimagesearch.com/2014/08/25/4-point-opencv-getperspective-transform-example/'
@@ -212,14 +213,38 @@ def makeCardReadable(card, frame):
 	# return the warped image
     return gray_warped
 
+def isolateSuitsValues(cardImg,frame):
+    suit_img = []
+    value_img = []
+   
+    rankImg = cv2.resize(cardImg[0:45,0:32],(40,80))
+    cannyR = cv2.Canny(rankImg, 150, 175)
+    retR, threshR = cv2.threshold(cannyR, 127, 255, 0)
+    contoursR, hierarchyR = cv2.findContours(threshR,cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    cv2.drawContours(rankImg,contoursR, -1, (0,255,0), 0)
+    for contour in contoursR:
+         (x,y,w,h) = cv2.boundingRect(contour)
+         cv2.rectangle(rankImg, (x,y), (x+w,y+h), (0,255,0), 2)
+    suitImg = cv2.resize(cardImg[40:84,0:32],(60,90))
+    cannyS = cv2.Canny(suitImg, 150, 175)
+    retS, threshS = cv2.threshold(cannyS, 127, 255, 0)
+    contoursS, hierarchyS = cv2.findContours(threshS,cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
+    cv2.drawContours(suitImg,contoursS, -1, (0,255,0), 0)
+    for contour in contoursS:
+         (x,y,w,h) = cv2.boundingRect(contour)
+         cv2.rectangle(suitImg, (x,y), (x+w,y+h), (0,255,0), 2)
+    
+    #for contour in contours:
+    #   (x,y,w,h) = cv2.boundingRect(contour)
+     #  cv2.rectangle(frame, (x,y), (x+w,y+h), (0,255,0), 2)
 
-
+    return suitImg, rankImg
 
 while True:
+    cv2.waitKey(100)
     ret, frame = cap.read()
-    #frame = cv2.resize(frame, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_AREA)
-
+    #frame = cv2.resize(frame, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_AREA
 
     grayImage = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     #cv2.imshow('Gray',grayImage)
