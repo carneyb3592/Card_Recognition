@@ -55,7 +55,7 @@ def process_suits():
     for Suits in ['Clubs','Diamonds','Spades','Hearts']:
         suit_list.append(Suit())
         suit_list[counter].name = Suits
-        suit_list[counter].image = cv2.resize(cv2.imread((FILEPATH + Suits + '.jpg'),cv2.COLOR_BGR2GRAY),(60,90))
+        suit_list[counter].image = cv2.imread((FILEPATH + Suits + '.jpg'),cv2.COLOR_BGR2GRAY)
         counter = counter + 1
     return suit_list
 def process_values():
@@ -66,7 +66,7 @@ def process_values():
     for Values in ['Ace','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Jack','Queen','King']:
         value_list.append(Value())
         value_list[counter].name = Values
-        value_list[counter].image = cv2.resize(cv2.imread((FILEPATH + Values + '.jpg'),cv2.COLOR_BGR2GRAY),(40,80))
+        value_list[counter].image = cv2.imread((FILEPATH + Values + '.jpg'),cv2.COLOR_BGR2GRAY)
         value_list[counter].value = counter + 1
         counter = counter + 1
     return value_list
@@ -124,8 +124,8 @@ def detect_Cards(contours, frame):
     
 
 def recognize_cards(cards, frame,contours,hierarchy):
-    #suits = process_suits()
-    #values = process_values()
+    suits = process_suits()
+    values = process_values()
     for card in cards:
         card.correctedImg = makeCardReadable(card, frame)
         cv2.imshow('Rcards',card.correctedImg)
@@ -140,14 +140,16 @@ def recognize_cards(cards, frame,contours,hierarchy):
         card.suitImg, card.rankImg = isolateSuitsValues(card.correctedImg,frame)
         cv2.imshow('Rank',card.rankImg)
         cv2.imshow('Suit',card.suitImg)
+        
+        ##Code to make and save images
         #c = cv2.waitKey(1)
         #if c == ord('q'):
-         #   cv2.imwrite("Four.jpg",card.rankImg)
-          #  cv2.imwrite("Clubs.jpg",card.suitImg)
+         #   cv2.imwrite("Queen.jpg",card.rankImg)
+            #cv2.imwrite("Clubs.jpg",card.suitImg)
 
-        #card.suit = detect_suit(card,suits)
-        #card.rank, card.value = detect_value(card,values)
-        #print(card.suit,card.rank)
+        card.suit = detect_suit(card,suits)
+        card.rank, card.value = detect_value(card,values)
+        print(card.suit,card.rank)
 
 def detect_suit(card,suits):
     best_match = 10000
@@ -225,28 +227,66 @@ def isolateSuitsValues(cardImg,frame):
     suit_img = []
     value_img = []
    
-    cardImg = cv2.resize(cardImg[0:84,0:32],(0,0),fx = 4, fy = 4)
+    cardImg = cardImg[0:84,0:32]
+    
+    rankImg = cardImg[0:45,0:32]
+    suitImg = cardImg[45:84,0:32]
 
-    cannyR = cv2.Canny(cardImg, 150, 175)
-    ret, thresh = cv2.threshold(cannyR, 127, 255, cv2.THRESH_BINARY_INV)
-    Qrank = thresh[20:185, 0:128]
-    Qsuit = thresh[186:336, 0:128]
-    contours, hierarchy = cv2.findContours(Qrank,cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    cannyR = cv2.Canny(rankImg, 150, 175)
+    ret, thresh = cv2.threshold(cannyR, 127, 255, 0)
+    contours, hierarchy = cv2.findContours(thresh,cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     contours = sorted(contours, key=cv2.contourArea,reverse=True)
+    (x,y,w,h) = cv2.boundingRect(contours[0])
+    rankImg = thresh[y:y+h,x:x+w]
+    rankImg = cv2.resize(rankImg,(60,90))
+
+    cannyS = cv2.Canny(suitImg, 150, 175)
+    retS, threshS= cv2.threshold(cannyS, 127, 255, 0)
+    contoursS, hierarchyS = cv2.findContours(threshS,cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    contoursS = sorted(contoursS, key=cv2.contourArea,reverse=True)
+    (xS,yS,wS,hS) = cv2.boundingRect(contoursS[0])
+    suitImg = threshS[yS:yS+hS,xS:xS+wS]
+    suitImg = cv2.resize(suitImg,(60,90))
+    return suitImg, rankImg
+
+    #rankImg = thresh[20:185, 0:128]
+    #suitImg = thresh[186:336, 0:128]
+    #contours, hierarchy = cv2.findContours(Qrank,cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    #contours = sorted(contours, key=cv2.contourArea,reverse=True)
     
-    if len(contours) != 0:
-        (x,y,w,h) = cv2.boundingRect(contours[0])
-        suit_img = thresh[y:y+h, x:x+w]
-        value_img = thresh[y:y+h,x:x+w]
+    #if len(contours) != 0:
+    #    (x,y,w,h) = cv2.boundingRect(contours[0])
+    #    suit_img = thresh[y:y+h, x:x+w]
+    #    value_img = thresh[y:y+h,x:x+w]
     
+    #contoursR, hierarchyR = cv2.findContours(rankImg,cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    #contoursR = sorted(contoursR, key=cv2.contourArea,reverse=True)
+    #cv2.drawContours(rankImg,contoursR, -1, (0,255,0), 0)
+    #if len(contoursR) != 0:
+    #     (x,y,w,h) = cv2.boundingRect(contoursR[0])
+    #     cv2.rectangle(frame, (x,y), (x+w,y+h), (0,255,0), 2)
+    #     svalue_img = thresh[y:y+h, x:x+w]
+    #else:
+    #    raise IOError('Couldnt Find image')
+    
+    #contoursS, hierarchyS = cv2.findContours(suitImg,cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    #contoursS = sorted(contoursS, key=cv2.contourArea,reverse=True)
+    ##cv2.drawContours(suitImg,contoursS, -1, (0,255,0), 0)
+    #if len(contoursS) != 0:
+    #     (x,y,w,h) = cv2.boundingRect(contoursS[0])
+    #     suit_img = thresh[y:y+h, x:x+w]
+    #else:
+    #    raise IOError('Couldnt Find image')
+    #for contour in contours:
+    #   (x,y,w,h) = cv2.boundingRect(contour)
+    #  cv2.rectangle(frame, (x,y), (x+w,y+h), (0,255,0), 2)
     
 
     #cv2.drawContours(rankImg,contoursR, -1, (0,255,0), 0)
         #for contour in contours:
     #   (x,y,w,h) = cv2.boundingRect(contour)
     #   cv2.rectangle(frame, (x,y), (x+w,y+h), (0,255,0), 2)
-
-    return np.array(suit_img), np.array(value_img)
+    #return np.array(suit_img), np.array(value_img)
 
 while True:
     cv2.waitKey(200)
