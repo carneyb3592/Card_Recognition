@@ -18,6 +18,7 @@ RANK_AREA_MIN = 50
 RANK_AREA_MAX = 150
 FILEPATH = r'C:\Users\djntr\source\repos\CardRecognition\CardRecognition\CardImages\\'
 
+final_cards = []
 
 class Card:
     def __init__(self):
@@ -226,7 +227,6 @@ def makeCardReadable(card, frame):
     
 
 while True:
-    cards = []
     cv2.waitKey(200)
     ret, frame = cap.read()
     #frame = cv2.resize(frame, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_AREA
@@ -241,7 +241,7 @@ while True:
    
     contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     
-    cards = detect_Cards(contours, frame)
+    final_cards = detect_Cards(contours, frame)
     #print(cards)
     #print(hierarchy)    
     #cv2.drawContours(frame, contours, -1, (0,255,0), 0)
