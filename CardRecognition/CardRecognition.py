@@ -117,7 +117,8 @@ def detect_Cards(contours, frame):
                 cv2.rectangle(frame, (x,y), (x+w,y+h), (0,255,0), 2)
                 #cv2.drawContours(frame, contour, -1, (0,255,0), 2)
                 #print(card.contour)
-    recognize_cards(possible_cards, frame,contours,hierarchy)
+    possible_cards = recognize_cards(possible_cards, frame,contours,hierarchy)
+    return possible_cards
     
 
 def recognize_cards(cards, frame,contours,hierarchy):
@@ -142,6 +143,7 @@ def recognize_cards(cards, frame,contours,hierarchy):
         card.suit,card.rank = determineBestMatch(card,card_images)
        
         print(card.suit,card.rank)
+    return cards
 
 def determineBestMatch(card,card_images):
     best_match = 10000
@@ -224,6 +226,7 @@ def makeCardReadable(card, frame):
     
 
 while True:
+    cards = []
     cv2.waitKey(200)
     ret, frame = cap.read()
     #frame = cv2.resize(frame, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_AREA
@@ -238,8 +241,8 @@ while True:
    
     contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     
-    detect_Cards(contours, frame)
-    
+    cards = detect_Cards(contours, frame)
+    #print(cards)
     #print(hierarchy)    
     #cv2.drawContours(frame, contours, -1, (0,255,0), 0)
     cv2.imshow('Input', frame)
