@@ -129,17 +129,15 @@ def recognize_cards(cards, frame,contours,hierarchy):
         
         cannyR = cv2.Canny(card.correctedImg, 150, 175)
         ret, thresh = cv2.threshold(cannyR, 127, 255, 0)
-        #thresh = cv2.adaptiveThreshold(cannyR,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV,11,2)
-        contours, hierarchy = cv2.findContours(thresh,cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        thresh = cv2.adaptiveThreshold(cannyR,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV,11,2)
+        #contours, hierarchy = cv2.findContours(thresh,cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         card.thresh = thresh
         cv2.imshow('cardd',thresh)
         
         
         
         ##Code to make and save images
-        #c = cv2.waitKey(1)
-        #if c == ord('q'):
-        #    cv2.imwrite("SpadesTwo.jpg",thresh)
+        #cv2.imwrite("DiamondsAce.jpg",thresh)
         
         card.suit,card.rank = determineBestMatch(card,card_images)
        
