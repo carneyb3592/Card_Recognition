@@ -101,20 +101,6 @@ def detect_Cards(contours, frame):
                 card.y = y
                 card.corners = corners
                 possible_cards.append(card)
-                font = cv2.FONT_HERSHEY_SIMPLEX
-  
-                # fontScale
-                fontScale = 1
-   
-                # Blue color in BGR
-                color = (255, 0, 0)
-  
-                # Line thickness of 2 px
-                thickness = 2
-   
-                # Using cv2.putText() method
-                #image = cv2.putText(frame, 'Card', (x + int(w/2),y + int(h/2)), font, 
-                #                  fontScale, color, thickness, cv2.LINE_AA)
                 cv2.rectangle(frame, (x,y), (x+w,y+h), (0,255,0), 2)
                 #cv2.drawContours(frame, contour, -1, (0,255,0), 2)
                 #print(card.contour)
@@ -142,9 +128,26 @@ def recognize_cards(cards, frame,contours,hierarchy):
         #cv2.imwrite("DiamondsAce.jpg",thresh)
         
         card.suit,card.rank = determineBestMatch(card,card_images)
-       
-        print(card.suit,card.rank)
+        drawCards(card,frame)
+        
+        #print(card.suit,card.rank)
     return cards
+
+def drawCards(card,frame):
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    
+    card_text = card.rank + ' of ' + card.suit
+    # fontScale
+    fontScale = 1
+   
+    # Blue color in BGR
+    color = (255, 0, 0)
+  
+    # Line thickness of 2 px
+    thickness = 2
+   
+    # Using cv2.putText() method
+    cv2.putText(frame, card_text, (card.x,card.y + int(card.height/2)), font, fontScale, color, thickness, cv2.LINE_AA)
 
 def determineBestMatch(card,card_images):
     best_match = 10000
